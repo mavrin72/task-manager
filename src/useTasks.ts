@@ -6,7 +6,19 @@ const STORAGE_KEY = 'task-manager-tasks';
 function loadTasks(): Task[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) return [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (JSON.parse(raw) as any[]).map(t => ({
+      id: t.id ?? crypto.randomUUID(),
+      title: t.title ?? '',
+      description: t.description ?? '',
+      initiator: t.initiator ?? '',
+      deadline: t.deadline ?? '',
+      completed: t.completed ?? false,
+      priority: t.priority ?? 'medium',
+      createdAt: t.createdAt ?? Date.now(),
+      comments: Array.isArray(t.comments) ? t.comments : [],
+    }));
   } catch {
     return [];
   }
