@@ -6,7 +6,7 @@ import { Filters } from './components/Filters';
 import type { Status, Priority } from './types';
 
 export default function App() {
-  const { tasks, addTask, toggleTask, deleteTask, updateTask } = useTasks();
+  const { tasks, addTask, toggleTask, deleteTask, updateTask, addComment } = useTasks();
   const [status, setStatus] = useState<Status>('all');
   const [priority, setPriority] = useState<Priority | 'all'>('all');
 
@@ -20,12 +20,31 @@ export default function App() {
   });
 
   const activeCount = tasks.filter(t => !t.completed).length;
+  const totalCount = tasks.length;
 
   return (
     <div className="app">
       <header className="header">
-        <h1>Task Manager</h1>
-        <span className="counter">{activeCount} активних</span>
+        <div className="header-content">
+          <div className="header-title-wrap">
+            <h1 className="header-title">Task Manager</h1>
+            <p className="header-sub">Управляй своїми задачами ефективно</p>
+          </div>
+          <div className="header-stats">
+            <div className="stat">
+              <span className="stat-value">{totalCount}</span>
+              <span className="stat-label">всього</span>
+            </div>
+            <div className="stat stat--active">
+              <span className="stat-value">{activeCount}</span>
+              <span className="stat-label">активних</span>
+            </div>
+            <div className="stat stat--done">
+              <span className="stat-value">{totalCount - activeCount}</span>
+              <span className="stat-label">виконано</span>
+            </div>
+          </div>
+        </div>
       </header>
 
       <TaskForm onAdd={addTask} />
@@ -38,7 +57,11 @@ export default function App() {
       />
 
       {filtered.length === 0 ? (
-        <p className="empty">Задач немає</p>
+        <div className="empty">
+          <span className="empty-icon">📋</span>
+          <p>Задач немає</p>
+          <span className="empty-hint">Натисни «Нова задача» щоб почати</span>
+        </div>
       ) : (
         <ul className="task-list">
           {filtered.map(task => (
@@ -48,6 +71,7 @@ export default function App() {
               onToggle={toggleTask}
               onDelete={deleteTask}
               onUpdate={updateTask}
+              onAddComment={addComment}
             />
           ))}
         </ul>

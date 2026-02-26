@@ -19,13 +19,23 @@ export function useTasks() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
 
-  function addTask(title: string, priority: Priority) {
+  function addTask(
+    title: string,
+    priority: Priority,
+    description: string,
+    initiator: string,
+    deadline: string,
+  ) {
     const task: Task = {
       id: crypto.randomUUID(),
       title,
+      description,
+      initiator,
+      deadline,
       completed: false,
       priority,
       createdAt: Date.now(),
+      comments: [],
     };
     setTasks(prev => [task, ...prev]);
   }
@@ -40,11 +50,27 @@ export function useTasks() {
     setTasks(prev => prev.filter(t => t.id !== id));
   }
 
-  function updateTask(id: string, title: string, priority: Priority) {
+  function updateTask(id: string, data: Partial<Omit<Task, 'id' | 'createdAt' | 'comments'>>) {
     setTasks(prev =>
-      prev.map(t => (t.id === id ? { ...t, title, priority } : t))
+      prev.map(t => (t.id === id ? { ...t, ...data } : t))
     );
   }
 
-  return { tasks, addTask, toggleTask, deleteTask, updateTask };
+  function addComment(taskId: string, text: string, author: string) {
+    setTasks(prev =>
+      prev.map(t =>
+        t.id === taskId
+          ? {
+              ...t,
+              comments: [
+                ...t.comments,
+                { id: crypto.randomUUID(), text, author, createdAt: Date.now() },
+              ],
+            }
+          : t
+      )
+    );
+  }
+
+  return { tasks, addTask, toggleTask, deleteTask, updateTask, addComment };
 }
