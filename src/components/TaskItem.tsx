@@ -41,7 +41,6 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate, onAddComment }: P
   const [editing, setEditing] = useState(false);
   const [removing, setRemoving] = useState(false);
   const [commentText, setCommentText] = useState('');
-  const [commentAuthor, setCommentAuthor] = useState('');
 
   // edit state
   const [editTitle, setEditTitle] = useState(task.title);
@@ -73,9 +72,8 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate, onAddComment }: P
   function handleAddComment(e: React.FormEvent) {
     e.preventDefault();
     if (!commentText.trim()) return;
-    onAddComment(task.id, commentText.trim(), commentAuthor.trim() || 'Анонім');
+    onAddComment(task.id, commentText.trim(), '');
     setCommentText('');
-    setCommentAuthor('');
   }
 
   return (
@@ -173,6 +171,9 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate, onAddComment }: P
                     📅 {deadlineInfo.label}
                   </span>
                 )}
+                <span className="meta-date">
+                  🗓 {new Date(task.createdAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' })}
+                </span>
                 {task.comments.length > 0 && (
                   <span className="meta-comments">💬 {task.comments.length}</span>
                 )}
@@ -234,16 +235,12 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate, onAddComment }: P
                   <ul className="comments-list">
                     {task.comments.map(c => (
                       <li key={c.id} className="comment-item">
-                        <Initials name={c.author} />
                         <div className="comment-body">
-                          <div className="comment-header">
-                            <span className="comment-author">{c.author}</span>
-                            <span className="comment-time">
-                              {new Date(c.createdAt).toLocaleString('uk-UA', {
-                                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
-                              })}
-                            </span>
-                          </div>
+                          <span className="comment-time">
+                            {new Date(c.createdAt).toLocaleString('uk-UA', {
+                              day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+                            })}
+                          </span>
                           <p className="comment-text">{c.text}</p>
                         </div>
                       </li>
@@ -252,20 +249,12 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate, onAddComment }: P
                 )}
 
                 <form className="comment-form" onSubmit={handleAddComment}>
-                  <div className="comment-inputs">
-                    <input
-                      className="field-input field-input--sm"
-                      placeholder="Ваше ім'я..."
-                      value={commentAuthor}
-                      onChange={e => setCommentAuthor(e.target.value)}
-                    />
-                    <input
-                      className="field-input field-input--sm"
-                      placeholder="Напишіть коментар..."
-                      value={commentText}
-                      onChange={e => setCommentText(e.target.value)}
-                    />
-                  </div>
+                  <input
+                    className="field-input field-input--sm"
+                    placeholder="Напишіть коментар..."
+                    value={commentText}
+                    onChange={e => setCommentText(e.target.value)}
+                  />
                   <button type="submit" className="btn btn-comment">Додати</button>
                 </form>
               </div>
