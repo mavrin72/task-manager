@@ -147,7 +147,7 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate, onAddComment }: P
       ) : (
         <>
           <div className="task-top" onClick={() => setExpanded(v => !v)}>
-            <div className="task-check-wrap" onClick={e => { e.stopPropagation(); onToggle(task.id); }}>
+            <div className="task-check-wrap" onClick={e => e.stopPropagation()}>
               <input
                 type="checkbox"
                 className="task-checkbox"
@@ -174,6 +174,11 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate, onAddComment }: P
                 <span className="meta-date">
                   🗓 {new Date(task.createdAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' })}
                 </span>
+                {task.completed && task.completedAt && (
+                  <span className="meta-completed">
+                    ✅ {new Date(task.completedAt).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' })}
+                  </span>
+                )}
                 {task.comments.length > 0 && (
                   <span className="meta-comments">💬 {task.comments.length}</span>
                 )}
@@ -223,6 +228,16 @@ export function TaskItem({ task, onToggle, onDelete, onUpdate, onAddComment }: P
                     })}
                   </span>
                 </div>
+                {task.completed && task.completedAt && (
+                  <div className="detail-item detail-item--done">
+                    <span className="detail-label">Виконано</span>
+                    <span className="detail-value">
+                      ✅ {new Date(task.completedAt).toLocaleDateString('uk-UA', {
+                        day: 'numeric', month: 'long', year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="comments-section">

@@ -3,6 +3,7 @@ import { useTasks } from './useTasks';
 import { TaskForm } from './components/TaskForm';
 import { TaskItem } from './components/TaskItem';
 import { Filters } from './components/Filters';
+import { Chihuahua } from './components/Chihuahua';
 import type { Status, Priority } from './types';
 
 function useTheme() {
@@ -99,6 +100,8 @@ export default function App() {
           ))}
         </ul>
       )}
+
+      <Chihuahua />
     </div>
   );
 }

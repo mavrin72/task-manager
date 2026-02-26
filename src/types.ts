@@ -15,6 +15,7 @@ export interface Task {
   initiator: string;
   deadline: string; // YYYY-MM-DD
   completed: boolean;
+  completedAt?: number;
   priority: Priority;
   createdAt: number;
   comments: Comment[];
