@@ -3,9 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 type DogState = 'walking' | 'pausing' | 'sleeping';
 
 const DOG_W = 90;
-const WALK_SPEED = 75; // px/s
+const WALK_SPEED = 75;
 const MIN_X = 10;
-const SLEEP_AFTER_IDLE = 9; // seconds idle before sleeping
+const SLEEP_AFTER_IDLE = 9;
 
 function DogSVG({ facingRight, state, legPhase, tailPhase, blinkOn }: {
   facingRight: boolean;
@@ -45,7 +45,7 @@ function DogSVG({ facingRight, state, legPhase, tailPhase, blinkOn }: {
       <ellipse cx="31" cy={28 + b} rx="14" ry="6" fill="#d8a862" opacity="0.45" />
       <ellipse cx="40" cy={40 + b} rx="12" ry="4.5" fill="#a07030" opacity="0.25" />
 
-      {/* Back legs (behind body) */}
+      {/* Back legs */}
       <g transform={`translate(26, 43) rotate(${-legSwing * 0.85}) translate(-26, -43)`}>
         <rect x="22" y="43" width="8" height="18" rx="4" fill="#a07030" />
         <ellipse cx="26" cy="61" rx="6" ry="3.5" fill="#906020" />
@@ -123,9 +123,17 @@ function DogSVG({ facingRight, state, legPhase, tailPhase, blinkOn }: {
 }
 
 export function Chihuahua() {
-  const [, setTick] = useState(0);
   const sceneRef = useRef<HTMLDivElement>(null);
 
+  // State for rendering
+  const [dogX, setDogX] = useState(60);
+  const [facingRight, setFacingRight] = useState(true);
+  const [dogState, setDogState] = useState<DogState>('walking');
+  const [legPhase, setLegPhase] = useState(0);
+  const [tailPhase, setTailPhase] = useState(0);
+  const [blinkOn, setBlinkOn] = useState(false);
+
+  // Refs for animation loop internals (never read during render)
   const dogXRef = useRef(60);
   const facingRightRef = useRef(true);
   const stateRef = useRef<DogState>('walking');
@@ -133,7 +141,6 @@ export function Chihuahua() {
   const tailPhaseRef = useRef(0);
   const pauseTimerRef = useRef(0);
   const idleTimerRef = useRef(0);
-  const blinkOnRef = useRef(false);
 
   // Blinking
   useEffect(() => {
@@ -141,11 +148,9 @@ export function Chihuahua() {
     const scheduleBlink = () => {
       const delay = 2500 + Math.random() * 3000;
       timerId = setTimeout(() => {
-        blinkOnRef.current = true;
-        setTick(t => t + 1);
+        setBlinkOn(true);
         setTimeout(() => {
-          blinkOnRef.current = false;
-          setTick(t => t + 1);
+          setBlinkOn(false);
           scheduleBlink();
         }, 110);
       }, delay);
@@ -164,6 +169,7 @@ export function Chihuahua() {
       lastTs = ts;
 
       tailPhaseRef.current += dt * 5.5;
+      setTailPhase(tailPhaseRef.current);
 
       const state = stateRef.current;
       const x = dogXRef.current;
@@ -173,14 +179,19 @@ export function Chihuahua() {
       if (state === 'walking') {
         const newX = fr ? x + WALK_SPEED * dt : x - WALK_SPEED * dt;
         legPhaseRef.current += dt * 10;
+        setLegPhase(legPhaseRef.current);
 
         if (newX >= maxX || newX <= MIN_X) {
-          dogXRef.current = newX >= maxX ? maxX : MIN_X;
+          const clampedX = newX >= maxX ? maxX : MIN_X;
+          dogXRef.current = clampedX;
+          setDogX(clampedX);
           stateRef.current = 'pausing';
+          setDogState('pausing');
           pauseTimerRef.current = 0.8 + Math.random() * 2;
           idleTimerRef.current = 0;
         } else {
           dogXRef.current = newX;
+          setDogX(newX);
         }
       } else if (state === 'pausing') {
         pauseTimerRef.current -= dt;
@@ -188,14 +199,16 @@ export function Chihuahua() {
 
         if (idleTimerRef.current > SLEEP_AFTER_IDLE) {
           stateRef.current = 'sleeping';
+          setDogState('sleeping');
         } else if (pauseTimerRef.current <= 0) {
-          facingRightRef.current = !fr;
+          const newFacing = !fr;
+          facingRightRef.current = newFacing;
+          setFacingRight(newFacing);
           stateRef.current = 'walking';
+          setDogState('walking');
         }
       }
-      // 'sleeping': stays until clicked
 
-      setTick(t => t + 1);
       rafId = requestAnimationFrame(loop);
     };
 
@@ -205,12 +218,10 @@ export function Chihuahua() {
 
   const handleClick = () => {
     stateRef.current = 'pausing';
+    setDogState('pausing');
     idleTimerRef.current = 0;
     pauseTimerRef.current = 1.5;
-    setTick(t => t + 1);
   };
-
-  const isSleeping = stateRef.current === 'sleeping';
 
   return (
     <div className="chihuahua-wrapper">
@@ -218,20 +229,20 @@ export function Chihuahua() {
         className="chihuahua-scene"
         ref={sceneRef}
         onClick={handleClick}
-        title={isSleeping ? 'Клікни щоб розбудити!' : 'Клікни щоб погладити!'}
+        title={dogState === 'sleeping' ? 'Клікни щоб розбудити!' : 'Клікни щоб погладити!'}
       >
-        <div style={{ position: 'absolute', left: dogXRef.current, bottom: 38 }}>
+        <div style={{ position: 'absolute', left: dogX, bottom: 38 }}>
           <DogSVG
-            facingRight={facingRightRef.current}
-            state={stateRef.current}
-            legPhase={legPhaseRef.current}
-            tailPhase={tailPhaseRef.current}
-            blinkOn={blinkOnRef.current}
+            facingRight={facingRight}
+            state={dogState}
+            legPhase={legPhase}
+            tailPhase={tailPhase}
+            blinkOn={blinkOn}
           />
         </div>
         <div className="chi-ground" />
         <div className="chi-hint">
-          {isSleeping ? '😴 Спить... Клікни щоб розбудити!' : '🐾 Клікни щоб погладити!'}
+          {dogState === 'sleeping' ? '😴 Спить... Клікни щоб розбудити!' : '🐾 Клікни щоб погладити!'}
         </div>
       </div>
     </div>
