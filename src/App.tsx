@@ -6,6 +6,42 @@ import { Filters } from './components/Filters';
 import { Chihuahua } from './components/Chihuahua';
 import type { Status, Priority } from './types';
 
+const PASSWORD = 'Zrj[f.vfhsire7474';
+
+function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
+  const [input, setInput] = useState('');
+  const [error, setError] = useState(false);
+
+  const submit = () => {
+    if (input === PASSWORD) {
+      localStorage.setItem('tm-auth', '1');
+      onSuccess();
+    } else {
+      setError(true);
+      setInput('');
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: '12px' }}>
+      <h2>Task Manager</h2>
+      <input
+        type="password"
+        placeholder="Пароль"
+        value={input}
+        onChange={e => setInput(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && submit()}
+        style={{ padding: '8px 12px', fontSize: '16px', borderRadius: '6px', border: '1px solid #ccc', width: '240px' }}
+        autoFocus
+      />
+      {error && <span style={{ color: 'red', fontSize: '14px' }}>Невірний пароль</span>}
+      <button onClick={submit} style={{ padding: '8px 24px', fontSize: '16px', borderRadius: '6px', cursor: 'pointer' }}>
+        Увійти
+      </button>
+    </div>
+  );
+}
+
 function useTheme() {
   const [dark, setDark] = useState<boolean>(() => {
     const saved = localStorage.getItem('tm-theme');
@@ -21,7 +57,7 @@ function useTheme() {
   return { dark, toggle: () => setDark(v => !v) };
 }
 
-export default function App() {
+function TaskApp() {
   const { tasks, addTask, toggleTask, deleteTask, updateTask, addComment } = useTasks();
   const [status, setStatus] = useState<Status>('all');
   const [priority, setPriority] = useState<Priority | 'all'>('all');
@@ -104,4 +140,10 @@ export default function App() {
       <Chihuahua />
     </div>
   );
+}
+
+export default function App() {
+  const [auth, setAuth] = useState(() => localStorage.getItem('tm-auth') === '1');
+  if (!auth) return <LoginScreen onSuccess={() => setAuth(true)} />;
+  return <TaskApp />;
 }
