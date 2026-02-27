@@ -57,11 +57,10 @@ function useTheme() {
   return { dark, toggle: () => setDark(v => !v) };
 }
 
-function TaskApp() {
+function TaskApp({ dark, toggle }: { dark: boolean; toggle: () => void }) {
   const { tasks, addTask, toggleTask, deleteTask, updateTask, addComment } = useTasks();
   const [status, setStatus] = useState<Status>('all');
   const [priority, setPriority] = useState<Priority | 'all'>('all');
-  const { dark, toggle } = useTheme();
 
   const filtered = tasks.filter(t => {
     const statusMatch =
@@ -144,6 +143,7 @@ function TaskApp() {
 
 export default function App() {
   const [auth, setAuth] = useState(() => localStorage.getItem('tm-auth') === '1');
+  const { dark, toggle } = useTheme();
   if (!auth) return <LoginScreen onSuccess={() => setAuth(true)} />;
-  return <TaskApp />;
+  return <TaskApp dark={dark} toggle={toggle} />;
 }
