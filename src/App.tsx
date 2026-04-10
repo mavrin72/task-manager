@@ -4,6 +4,7 @@ import { TaskForm } from './components/TaskForm';
 import { TaskItem } from './components/TaskItem';
 import { Filters } from './components/Filters';
 import { Chihuahua } from './components/Chihuahua';
+import { PowerOutageChecker } from './components/PowerOutageChecker';
 import type { Status, Priority } from './types';
 
 const PASSWORD = 'Zrj[f.vfhsire7474';
@@ -24,7 +25,7 @@ function LoginScreen({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: '12px' }}>
-      <h2>Task Manager</h2>
+      <h2>Менеджер задач</h2>
       <input
         type="password"
         placeholder="Пароль"
@@ -80,7 +81,7 @@ function TaskApp() {
       <header className="header">
         <div className="header-content">
           <div className="header-title-wrap">
-            <h1 className="header-title">Task Manager</h1>
+            <h1 className="header-title">Менеджер задач</h1>
           </div>
           <div className="header-right">
             <div className="header-stats">
@@ -106,6 +107,8 @@ function TaskApp() {
           </div>
         </div>
       </header>
+
+      <PowerOutageChecker />
 
       <TaskForm onAdd={addTask} />
 
